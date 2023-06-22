@@ -4,10 +4,12 @@
 #include "driver/gpio.h"
 #include "esp_log.h"
 
-#define DELAY 200
+#define DELAY 1000
 #define LED 2
 
 uint8_t led_level = 0;
+
+static const char *TAG = "LED";
 
 esp_err_t init_led(void);
 esp_err_t blink_led(void);
@@ -22,6 +24,9 @@ void app_main()
         vTaskDelay( DELAY/portTICK_PERIOD_MS); //delay obligatorio
         blink_led(); //blinkeo led
         printf("Led level : %u \n", led_level );
+        ESP_LOGI(TAG,"Texto verde");
+        ESP_LOGW(TAG,"Texto amarillo");
+        ESP_LOGE(TAG,"Texto rojo");
     }
 }
 
