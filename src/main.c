@@ -3,13 +3,17 @@
 #include "freertos/task.h"
 #include "driver/gpio.h"
 #include "esp_log.h"
+#include "esp_wifi.h"
+#include "esp_http_server.h"
 
 #define DELAY 1000
 #define LED 2
 
 uint8_t led_level = 0;
 
-static const char *TAG = "LED";
+static const char *TAG0 = "LED";
+static const char *TAG1 = "WIFI";
+static const char *TAG2 = "WEBSERVER";
 
 esp_err_t init_led(void);
 esp_err_t blink_led(void);
@@ -24,9 +28,9 @@ void app_main()
         vTaskDelay( DELAY/portTICK_PERIOD_MS); //delay obligatorio
         blink_led(); //blinkeo led
         printf("Led level : %u \n", led_level );
-        ESP_LOGI(TAG,"Texto verde");
-        ESP_LOGW(TAG,"Texto amarillo");
-        ESP_LOGE(TAG,"Texto rojo");
+        ESP_LOGI(TAG0,"Texto verde");
+        ESP_LOGW(TAG1,"Texto amarillo");
+        ESP_LOGE(TAG2,"Texto rojo");
     }
 }
 
