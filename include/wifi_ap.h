@@ -15,5 +15,5 @@
 #include "lwip/err.h"
 #include "lwip/sys.h"
 #include "esp_mac.h"
-static void wifi_event_handler(void*, esp_event_base_t, int32_t, void*);
+void wifi_event_handler(void*, esp_event_base_t, int32_t, void*);
 void wifi_init_softap(void);

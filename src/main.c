@@ -17,29 +17,32 @@
 #include "esp_mac.h"
 #include "wifi_ap.h"
 #include "led.h"
+#include "web_server.h"
 
 #define DELAY 10000
 
-//#define TAG "WIFI AP"
-
-void app_main() 
+void app_main()
 {
-    init_led(); //configuracion del pin/led
-     //Initialize NVS
-    esp_err_t ret = nvs_flash_init();
-    if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
-      ESP_ERROR_CHECK(nvs_flash_erase());
-      ret = nvs_flash_init();
-    }
-    ESP_ERROR_CHECK(ret);
+  static httpd_handle_t server = NULL;
 
-    //ESP_LOGI(TAG, "ESP_WIFI_MODE_AP");
-    wifi_init_softap();
-    
-    while(true)
-    {
-        vTaskDelay( DELAY/portTICK_PERIOD_MS); //delay obligatorio
-        blink_led(); //blinkeo led
-    }
+  init_led(); // configuracion del pin/led
+
+  // Initialize NVS
+  esp_err_t ret = nvs_flash_init();
+  ESP_ERROR_CHECK(ret);
+  /*if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
+    ESP_ERROR_CHECK(nvs_flash_erase());
+    ret = nvs_flash_init();
+  }*/
+
+  wifi_init_softap(); // Inicio el AP
+
+  ESP_ERROR_CHECK(esp_event_handler_register(IP_EVENT, IP_EVENT_AP_STAIPASSIGNED, &connect_handler, &server));
+  // ESP_ERROR_CHECK(esp_event_handler_register(WIFI_EVENT, WIFI_EVENT_STA_DISCONNECTED, &disconnect_handler, &server));
+
+  while (true)
+  {
+    vTaskDelay(DELAY / portTICK_PERIOD_MS); // delay obligatorio
+    blink_led();                            // blinkeo led
+  }
 }
-
