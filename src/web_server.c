@@ -1,82 +1,91 @@
 #include <string.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <esp_log.h>
 #include <nvs_flash.h>
 #include <sys/param.h>
+#include <sys/unistd.h>
+#include <sys/stat.h>
 #include "esp_netif.h"
-#include <esp_http_server.h>
+#include "esp_http_server.h"
 #include "esp_event.h"
 #include "esp_netif.h"
 #include "esp_tls.h"
 #include <esp_wifi.h>
-#include <esp_system.h>
+#include "esp_system.h"
 #include "nvs_flash.h"
 #include "web_server.h"
 
 static const char *TAG = "WEBSERVER";
+// static const char *HTML = "HTML";
 
-/* URI handler structure for POST /uri */
-httpd_uri_t uri_post =
+httpd_uri_t html_uri =
     {
-        .uri = "/uri",
-        .method = HTTP_POST,
-        .handler = post_handler,
+        .uri = "/index",
+        .method = HTTP_GET,
+        .handler = html_get_handler,
         .user_ctx = NULL};
 
-httpd_uri_t root =
-    {
-        .uri = "/",
-        .method = HTTP_GET,
-        .handler = root_get_handler,
-        .user_ctx = "Hello World!"};
+httpd_uri_t default_uri = {
+    .uri = "/hello",
+    .method = HTTP_GET,
+    .handler = hello_handler,
+    .user_ctx = "Hello World!!"};
 
-/* An HTTP GET handler */
-esp_err_t root_get_handler(httpd_req_t *req)
+esp_err_t html_get_handler(httpd_req_t *req)
 {
-    extern unsigned char view_start[] asm("_binary_view_html_start");
-    extern unsigned char view_end[] asm("_binary_view_html_end");
-    size_t view_len = view_end - view_start;
-    char viewHtml[view_len];
-    memcpy(viewHtml, view_start, view_len);
-    ESP_LOGI(TAG, "URI: %s", req->uri);
-    const char resp[] = "URI GET Response";
-    httpd_resp_send(req, resp, HTTPD_RESP_USE_STRLEN);
+    extern unsigned char index_start[] asm("_binary_index_html_start");
+    extern unsigned char index_end[] asm("_binary_index_html_end");
+    size_t index_len = index_end - index_start;
+    char indexHtml[index_len];
+    memcpy(indexHtml, index_start, index_len);
+    httpd_resp_send(req, indexHtml, index_len);
+    // free(viewHtml);
+
+    /* ESP_LOGI(HTML, "ABRIENDO EL HTML");
+     FILE *html_file = fopen("/spiffs/index.html", "r");
+     if (html_file == NULL)
+     {
+         ESP_LOGE(HTML,"NO SE PUEDO ABRIR EL ARCHIVO HTML");
+         return ESP_FAIL;
+     }
+     else
+     {
+         ESP_LOGI(HTML, "PUDE ABRIR EL ARCHIVO HTML");
+         char line[256];
+         while (fgets(line, sizeof(line), html_file))
+         {
+             ESP_LOGI(HTML, "ENTRE EN EL WHILE");
+             // Enviar cada línea del archivo como respuesta HTTP
+             httpd_resp_sendstr_chunk(req, line);
+         }
+         fclose(html_file);
+         ESP_LOGI(HTML, "CERRE EL FILE");
+     }
+
+     // Finalizar la respuesta HTTP
+     httpd_resp_sendstr_chunk(req, NULL);
+     ESP_LOGI(HTML, "ENVIO OK");*/
+    // httpd_resp_send(req, response_message, strlen(response_message));
     return ESP_OK;
 }
 
-esp_err_t post_handler(httpd_req_t *req)
+esp_err_t hello_handler(httpd_req_t *req)
 {
-    /* Destination buffer for content of HTTP POST request.
-     * httpd_req_recv() accepts char* only, but content could
-     * as well be any binary data (needs type casting).
-     * In case of string data, null termination will be absent, and
-     * content length would give length of string */
-    char content[100];
-
-    /* Truncate if content length larger than the buffer */
-    size_t recv_size = MIN(req->content_len, sizeof(content));
-
-    int ret = httpd_req_recv(req, content, recv_size);
-    if (ret <= 0)
-    { /* 0 return value indicates connection closed */
-        /* Check if timeout occurred */
-        if (ret == HTTPD_SOCK_ERR_TIMEOUT)
-        {
-            /* In case of timeout one can choose to retry calling
-             * httpd_req_recv(), but to keep it simple, here we
-             * respond with an HTTP 408 (Request Timeout) error */
-            httpd_resp_send_408(req);
-        }
-        /* In case of error, returning ESP_FAIL will
-         * ensure that the underlying socket is closed */
-        return ESP_FAIL;
+    // Enviar una respuesta HTTP predeterminada
+    esp_err_t error;
+    const char *response = "Hello, World!";
+    error = httpd_resp_send(req, response, strlen(response));
+    if (error != ESP_OK)
+    {
+        ESP_LOGE(TAG, "ERROR WHILE SENDING RESPONSE");
     }
-
-    /* Send a simple response */
-    const char resp[] = "URI POST Response";
-    httpd_resp_send(req, resp, HTTPD_RESP_USE_STRLEN);
-    return ESP_OK;
+    else
+    {
+        ESP_LOGI(TAG, "RESPONSE SEND SUCCESSFULLY");
+    }
+    return error;
 }
 
 httpd_handle_t start_webserver(void)
@@ -90,7 +99,9 @@ httpd_handle_t start_webserver(void)
     {
         // Set URI handlers
         ESP_LOGI(TAG, "Registering URI handlers");
-        httpd_register_uri_handler(server, &root);
+        // ESP_LOGI(TAG, "Registering HTML");
+        httpd_register_uri_handler(server, &html_uri);
+        httpd_register_uri_handler(server, &default_uri);
         return server;
     }
 
@@ -130,29 +141,3 @@ void connect_handler(void *arg, esp_event_base_t event_base, int32_t event_id, v
         *server = start_webserver();
     }
 }
-
-/* This handler allows the custom error handling functionality to be
- * tested from client side. For that, when a PUT request 0 is sent to
- * URI /ctrl, the /hello and /echo URIs are unregistered and following
- * custom error handler http_404_error_handler() is registered.
- * Afterwards, when /hello or /echo is requested, this custom error
- * handler is invoked which, after sending an error message to client,
- * either closes the underlying socket (when requested URI is /echo)
- * or keeps it open (when requested URI is /hello). This allows the
- * client to infer if the custom error handler is functioning as expected
- * by observing the socket state.
- */
-
-/*esp_err_t http_404_error_handler(httpd_req_t *req, httpd_err_code_t err)
-{
-    if (strcmp("/hello", req->uri) == 0)
-    {
-        httpd_resp_send_err(req, HTTPD_404_NOT_FOUND, "/hello URI is not available");
-
-        return ESP_OK;
-    }
-
-
-    httpd_resp_send_err(req, HTTPD_404_NOT_FOUND, "Some 404 error message");
-    return ESP_FAIL;
-}*/

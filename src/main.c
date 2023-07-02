@@ -18,6 +18,7 @@
 #include "wifi_ap.h"
 #include "led.h"
 #include "web_server.h"
+#include "esp_spiffs.h"
 
 #define DELAY 10000
 
@@ -30,16 +31,14 @@ void app_main()
   // Initialize NVS
   esp_err_t ret = nvs_flash_init();
   ESP_ERROR_CHECK(ret);
-  /*if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
-    ESP_ERROR_CHECK(nvs_flash_erase());
-    ret = nvs_flash_init();
-  }*/
-
+  /*esp_vfs_spiffs_conf_t spiffs_conf = {
+      .base_path = "/spiffs",
+      .partition_label = NULL,
+      .max_files = 5,
+      .format_if_mount_failed = true};
+  ESP_ERROR_CHECK(esp_vfs_spiffs_register(&spiffs_conf));*/
   wifi_init_softap(); // Inicio el AP
-
   ESP_ERROR_CHECK(esp_event_handler_register(IP_EVENT, IP_EVENT_AP_STAIPASSIGNED, &connect_handler, &server));
-  // ESP_ERROR_CHECK(esp_event_handler_register(WIFI_EVENT, WIFI_EVENT_STA_DISCONNECTED, &disconnect_handler, &server));
-
   while (true)
   {
     vTaskDelay(DELAY / portTICK_PERIOD_MS); // delay obligatorio

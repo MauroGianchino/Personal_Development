@@ -13,9 +13,10 @@
 #include <esp_system.h>
 #include "nvs_flash.h"
 
-esp_err_t root_get_handler(httpd_req_t *);
-//esp_err_t http_404_error_handler(httpd_req_t *, httpd_err_code_t);
+esp_err_t html_get_handler(httpd_req_t *);
+esp_err_t hello_handler(httpd_req_t *);
+// esp_err_t http_404_error_handler(httpd_req_t *, httpd_err_code_t);
 httpd_handle_t start_webserver(void);
 esp_err_t stop_webserver(httpd_handle_t);
-void disconnect_handler(void*, esp_event_base_t,int32_t, void*);
-void connect_handler(void*, esp_event_base_t,int32_t, void*);
+void disconnect_handler(void *, esp_event_base_t, int32_t, void *);
+void connect_handler(void *, esp_event_base_t, int32_t, void *);
