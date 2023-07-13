@@ -42,6 +42,6 @@ void app_main()
   while (true)
   {
     vTaskDelay(DELAY / portTICK_PERIOD_MS); // delay obligatorio
-    blink_led();                            // blinkeo led
+    //blink_led();                            // blinkeo led
   }
 }

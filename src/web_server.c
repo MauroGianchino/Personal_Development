@@ -16,6 +16,9 @@
 #include "esp_system.h"
 #include "nvs_flash.h"
 #include "web_server.h"
+#include "led.h"
+
+#define HTTPD_MAX_REQ_HDR_LEN 1024
 
 static const char *TAG = "WEBSERVER";
 // static const char *HTML = "HTML";
@@ -27,11 +30,11 @@ httpd_uri_t html_uri =
         .handler = html_get_handler,
         .user_ctx = NULL};
 
-httpd_uri_t default_uri = {
-    .uri = "/hello",
-    .method = HTTP_GET,
-    .handler = hello_handler,
-    .user_ctx = "Hello World!!"};
+httpd_uri_t pwm_post = {
+    .uri = "/pwm",
+    .method = HTTP_POST,
+    .handler = pwm_handler,
+    .user_ctx = NULL};
 
 esp_err_t html_get_handler(httpd_req_t *req)
 {
@@ -71,20 +74,24 @@ esp_err_t html_get_handler(httpd_req_t *req)
     return ESP_OK;
 }
 
-esp_err_t hello_handler(httpd_req_t *req)
+esp_err_t pwm_handler(httpd_req_t *req)
 {
     // Enviar una respuesta HTTP predeterminada
-    esp_err_t error;
-    const char *response = "Hello, World!";
-    error = httpd_resp_send(req, response, strlen(response));
-    if (error != ESP_OK)
+    esp_err_t error = ESP_OK;
+    ESP_LOGI(TAG, "ENTRE AL HANDLER DEL PWM");
+    blink_led();
+    ESP_LOGI(TAG, "SALGO DEL HANDLER DEL PWM");
+
+    // const char *response = "Hello, World!";
+    // error = httpd_resp_send(req, response, strlen(response));
+    /*if (error != ESP_OK)
     {
         ESP_LOGE(TAG, "ERROR WHILE SENDING RESPONSE");
     }
     else
     {
         ESP_LOGI(TAG, "RESPONSE SEND SUCCESSFULLY");
-    }
+    }*/
     return error;
 }
 
@@ -101,7 +108,7 @@ httpd_handle_t start_webserver(void)
         ESP_LOGI(TAG, "Registering URI handlers");
         // ESP_LOGI(TAG, "Registering HTML");
         httpd_register_uri_handler(server, &html_uri);
-        httpd_register_uri_handler(server, &default_uri);
+        httpd_register_uri_handler(server, &pwm_post);
         return server;
     }
 

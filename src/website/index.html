@@ -2,19 +2,50 @@
 <html>
 
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>test</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Proyecto Horticultura</title>
+    <style>
+        .range-container {
+            display: flex;
+            align-items: center;
+        }
+
+        .range-value {
+            margin-left: 10px;
+        }
+    </style>
 </head>
 
-<body>
-    <h1>Hola Boni</h1>
-    <h2>A nosotros nos gusta jugar al WoW </h2>
-    <h3>ESTO ES UNA PRUEBA</h3>
-    <h4>A VER SI FUNCIONA</h4>
-    <h5>CAMBIANDO DESDE EL ARCHIVO NOMAS</h5>
-    <h6></h6>
 
+
+<body>
+    <h1>Proyecto Horticultura</h1>
+    <h2>PWM</h2>
+    <form action="/pwm" method="post">
+
+        <div class="range-container">
+            <label for="rango" class="range-label">Intensidad (0%-100%):</label>
+            <input type="range" id="rango" name="rango" min="0" max="100" required>
+            <span id="rangoValor" class="range-value"></span>
+        </div><br><br>
+
+        <label for="opciones">Opciones:</label>
+        <select id="opciones" name="opciones">
+            <option value="Manual">Manual</option>
+            <option value="Automatico">Automatico</option>
+        </select><br><br>
+
+
+        <input type="submit" value="Enviar">
+    </form>
+    <script>
+        var rango = document.getElementById("rango");
+        var rangoValor = document.getElementById("rangoValor");
+
+        rango.oninput = function () {
+            rangoValor.textContent = rango.value;
+        };
+    </script>
 </body>
 
 </html>
