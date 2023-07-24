@@ -18,7 +18,6 @@ typedef enum
     MANUAL,
     AUTOMATICO
 } option_t;
-
 typedef struct horario
 {
     int h;
@@ -44,8 +43,16 @@ typedef struct pwm
     bool dia;
 } pwm_t;
 
-esp_err_t html_get_handler(httpd_req_t *);
-esp_err_t pwm_handler(httpd_req_t *);
+esp_err_t index_get_handler(httpd_req_t *);
+esp_err_t config_get_handler(httpd_req_t *);
+esp_err_t pwm_post_handler(httpd_req_t *);
+esp_err_t red_post_handler(httpd_req_t *);
+esp_err_t triac_post_handler(httpd_req_t *);
+esp_err_t vegeflor_post_handler(httpd_req_t *);
+esp_err_t red_data_handler(httpd_req_t *);
+esp_err_t pwm_data_handler(httpd_req_t *);
+esp_err_t triac_data_handler(httpd_req_t *);
+esp_err_t vegeflor_data_handler(httpd_req_t *);
 httpd_handle_t start_webserver(void);
 esp_err_t stop_webserver(httpd_handle_t);
 void disconnect_handler(void *, esp_event_base_t, int32_t, void *);

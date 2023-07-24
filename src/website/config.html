@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Proyecto Horticultura</title>
+</head>
+
+<body>
+    <h1>Proyecto Horticultura</h1>
+    <h2>Red</h2>
+    <form action="/net" method="post">
+        <label for="Nombre">Nombre:</label>
+        <input type="text" id="nombre" name="nombre" placeholder="Nuevo Nombre de Red">
+        <br><br>
+        <label for="Contraseña">Contraseña:</label>
+        <input type="text" id="Contraseña" name="Contraseña" placeholder="Nueva contraseña">
+        <br><br>
+        <input type="submit" value="Actualizar">
+
+    </form>
+
+    <h2>Intesidad de luz</h2>
+
+    <form action="/pwm" method="post">
+        <label for="rango" class="range-label">Intensidad (0%-100%):</label>
+        <input type="range" id="rango" name="rango" min="0" max="100" value="0" onchange="updateRangoValue()">
+        <span id="rangoValor">0</span>
+        <br><br>
+
+        <label>Modo:</label>
+        <select id="modos_pwm" name="modos_pwm" onchange="habilitarHorario()">
+            <option value="Manual">Manual</option>
+            <option value="Automatico">Automatico</option>
+        </select><br><br>
+
+        <label>Encendido:</label>
+        <input type="time" id="pwm_hi" name="pwm_hi" value="00:00" disabled>
+
+        <label>Apagado:</label>
+        <input type="time" id="pwm_fi" name="pwm_fi" value="00:00" disabled><br><br>
+
+        <label>Simulacion DIA:</label>
+        <select id="opciones" name="Opciones">
+            <option value="ON">ON</option>
+            <option value="OFF">OFF</option>
+        </select><br><br>
+
+        <input type="submit" value="Actualizar">
+
+    </form>
+    <h2>Salida 220V</h2>
+    <form action="/triac" method="post">
+        <label>Modo:</label>
+        <select id="modos_triac" name="modos_triac" onchange="deshabilitarCheckboxs()">
+            <option value="ON">ON</option>
+            <option value="Automatico">AUTO</option>
+            <option value="OFF">OFF</option>
+        </select><br><br>
+        <label>Habilitar Horario 1:</label>
+        <input type="checkbox" id="checkboxh1" name="checkboxh1"
+            onchange="toggleHorario('ih1','fh1','checkboxh1')"><br><br>
+
+        <label>Encendido:</label>
+        <input type="time" id="ih1" name="ih1" value="00:00" disabled>
+
+        <label>Apagado:</label>
+        <input type="time" id="fh1" name="fh1" value="00:00" disabled><br><br>
+
+        <label>Habilitar Horario 2:</label>
+        <input type="checkbox" id="checkboxh2" name="checkboxh2"
+            onchange="toggleHorario('ih2','fh2','checkboxh2')"><br><br>
+
+        <label>Encendido:</label>
+        <input type="time" id="ih2" name="ih2" value="00:00" disabled>
+
+        <label>Apagado:</label>
+        <input type="time" id="fh2" name="fh2" value="00:00" disabled><br><br>
+
+        <label>Habilitar Horario 3:</label>
+        <input type="checkbox" id="checkboxh3" name="checkboxh3"
+            onchange="toggleHorario('ih3','fh3','checkboxh3')"><br><br>
+
+        <label>Encendido:</label>
+        <input type="time" id="ih3" name="ih3" value="00:00" disabled>
+
+        <label>Apagado:</label>
+        <input type="time" id="fh3" name="fh3" value="00:00" disabled><br><br>
+
+        <label>Habilitar Horario 4:</label>
+        <input type="checkbox" id="checkboxh4" name="checkboxh4"
+            onchange="toggleHorario('ih4','fh4','checkboxh4')"><br><br>
+
+        <label>Encendido:</label>
+        <input type="time" id="ih4" name="ih4" value="00:00" disabled>
+
+        <label>Apagado:</label>
+        <input type="time" id="fh4" name="fh4" value="00:00" disabled><br><br>
+
+        <input type="submit" value="Actualizar">
+
+    </form>
+    <h2>VEGE/FLORA</h2>
+    <form action="/vegeflor" method="post">
+
+        <label>Modo:</label>
+        <select id="modos_vegeflor" name="modos_vegeflor">
+            <option value="VEGE">VEGE</option>
+            <option value="FLORA">FLORA</option>
+        </select><br><br>
+
+        <input type="submit" value="Actualizar">
+
+    </form>
+    <script>
+        window.addEventListener('load', () => {
+            setInterval(() => {
+                fetch("/data").then(res => {
+                    if (!res.ok)
+                        console.error("ESP NO RESPONDIO BIEN")
+
+                    return res.text()
+                }).then(data => {
+                    const integerData = parseInt(data, 10);
+                    console.log(data)
+                    document.getElementById("dataValue").textContent = "Intensidad: " + integerData;
+                })
+            }, 500)
+        })
+
+        function habilitarHorario() {
+            var selectElement = document.getElementById("modos_pwm");
+            var selectedValue = selectElement.value;
+            const horarioInput_i = document.getElementById("pwm_hi");
+            const horarioInput_f = document.getElementById("pwm_fi");
+
+            // Ejecutar una función específica para cada opción
+            if (selectedValue == "Automatico") {
+
+                horarioInput_i.disabled = false;
+                horarioInput_f.disabled = false;
+            }
+            else {
+                horarioInput_i.disabled = true;
+                horarioInput_f.disabled = true;
+
+            }
+        }
+        function deshabilitarCheckboxs() {
+            var selectElement = document.getElementById("modos_triac");
+            var selectedValue = selectElement.value;
+            const c1 = document.getElementById("checkboxh1");
+            const c2 = document.getElementById("checkboxh2");
+            const c3 = document.getElementById("checkboxh3");
+            const c4 = document.getElementById("checkboxh4");
+
+            // Ejecutar una función específica para cada opción
+            if (selectedValue == "Automatico") {
+
+                c1.disabled = false;
+                c2.disabled = false;
+                c3.disabled = false;
+                c4.disabled = false;
+            }
+            else {
+                c1.disabled = true;
+                c2.disabled = true;
+                c3.disabled = true;
+                c4.disabled = true;
+
+            }
+        }
+
+        function toggleHorario(InicioID, FinID, HorarioID) {
+            const horarioInput_i = document.getElementById(InicioID);
+            const horarioInput_f = document.getElementById(FinID);
+            const checkbox = document.getElementById(HorarioID);
+
+            if (checkbox.checked) {
+                horarioInput_i.disabled = false;
+                horarioInput_f.disabled = false;
+            } else {
+                horarioInput_i.disabled = true;
+                horarioInput_f.disabled = true;
+            }
+        }
+
+        function updateRangoValue() {
+            const rangoInput = document.getElementById('rango');
+            const rangoValueSpan = document.getElementById('rangoValor');
+
+            rangoValueSpan.textContent = rangoInput.value;
+        }
+
+    </script>
+</body>
+
+</html>

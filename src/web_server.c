@@ -17,11 +17,14 @@
 #include "nvs_flash.h"
 #include "web_server.h"
 #include "led.h"
+#include "cJSON.h"
 
 static const char *TAG = "WEBSERVER";
 static const char *PWM = "PWM";
 
 #define CONFIG_HTTPD_MAX_REQ_HDR_LEN 1024
+
+pwm_t pwm;
 
 void init_pwm(pwm_t *pwm)
 {
@@ -217,19 +220,68 @@ void parse_pwm(char *buff, pwm_t *pwm)
     ESP_LOGI(PWM, "Salgo del parseo");
 };
 
-httpd_uri_t html_uri = {
+httpd_uri_t index_uri = {
     .uri = "/index",
     .method = HTTP_GET,
-    .handler = html_get_handler,
+    .handler = index_get_handler,
+    .user_ctx = NULL};
+
+httpd_uri_t config_uri = {
+    .uri = "/config",
+    .method = HTTP_GET,
+    .handler = config_get_handler,
+    .user_ctx = NULL};
+
+httpd_uri_t red_post = {
+    .uri = "/red",
+    .method = HTTP_POST,
+    .handler = red_post_handler,
     .user_ctx = NULL};
 
 httpd_uri_t pwm_post = {
     .uri = "/pwm",
     .method = HTTP_POST,
-    .handler = pwm_handler,
+    .handler = pwm_post_handler,
     .user_ctx = NULL};
 
-esp_err_t html_get_handler(httpd_req_t *req)
+httpd_uri_t triac_post = {
+    .uri = "/triac",
+    .method = HTTP_POST,
+    .handler = triac_post_handler,
+    .user_ctx = NULL};
+
+httpd_uri_t vegeflor_post = {
+    .uri = "/vegeflor",
+    .method = HTTP_POST,
+    .handler = vegeflor_post_handler,
+    .user_ctx = NULL};
+
+httpd_uri_t data_pwm_uri = {
+    .uri = "/data_red",
+    .method = HTTP_GET,
+    .handler = red_data_handler,
+    .user_ctx = NULL};
+
+httpd_uri_t data_pwm_uri = {
+    .uri = "/data_pwm",
+    .method = HTTP_GET,
+    .handler = pwm_data_handler,
+    .user_ctx = NULL};
+
+httpd_uri_t data_pwm_uri = {
+    .uri = "/data_triac",
+    .method = HTTP_GET,
+    .handler = triac_data_handler,
+    .user_ctx = NULL};
+
+httpd_uri_t data_pwm_uri = {
+    .uri = "/data_vegeflor",
+    .method = HTTP_GET,
+    .handler = vegeflor_data_handler,
+    .user_ctx = NULL};
+
+//----------HANDLERS PARA LOS HTML------------//
+esp_err_t index_get_handler(httpd_req_t *req)
 {
     extern unsigned char index_start[] asm("_binary_index_html_start");
     extern unsigned char index_end[] asm("_binary_index_html_end");
@@ -237,43 +289,27 @@ esp_err_t html_get_handler(httpd_req_t *req)
     char indexHtml[index_len];
     memcpy(indexHtml, index_start, index_len);
     httpd_resp_send(req, indexHtml, index_len);
-    // free(viewHtml);
-
-    /* ESP_LOGI(HTML, "ABRIENDO EL HTML");
-     FILE *html_file = fopen("/spiffs/index.html", "r");
-     if (html_file == NULL)
-     {
-         ESP_LOGE(HTML,"NO SE PUEDO ABRIR EL ARCHIVO HTML");
-         return ESP_FAIL;
-     }
-     else
-     {
-         ESP_LOGI(HTML, "PUDE ABRIR EL ARCHIVO HTML");
-         char line[256];
-         while (fgets(line, sizeof(line), html_file))
-         {
-             ESP_LOGI(HTML, "ENTRE EN EL WHILE");
-             // Enviar cada línea del archivo como respuesta HTTP
-             httpd_resp_sendstr_chunk(req, line);
-         }
-         fclose(html_file);
-         ESP_LOGI(HTML, "CERRE EL FILE");
-     }
-
-     // Finalizar la respuesta HTTP
-     httpd_resp_sendstr_chunk(req, NULL);
-     ESP_LOGI(HTML, "ENVIO OK");*/
-    // httpd_resp_send(req, response_message, strlen(response_message));
     return ESP_OK;
 }
 
-esp_err_t pwm_handler(httpd_req_t *req)
+esp_err_t config_get_handler(httpd_req_t *req)
+{
+    extern unsigned char config_start[] asm("_binary_config_html_start");
+    extern unsigned char config_end[] asm("_binary_config_html_end");
+    size_t config_len = config_end - config_start;
+    char configHtml[config_len];
+    memcpy(configHtml, config_start, config_len);
+    httpd_resp_send(req, configHtml, config_len);
+    return ESP_OK;
+}
+
+//----------HANDLERS PARA LOS POST DE LAS SECCIONES------------//
+esp_err_t pwm_post_handler(httpd_req_t *req)
 {
     // Enviar una respuesta HTTP predeterminada
     ESP_LOGI(TAG, "ENTRE AL HANDLER DEL PWM");
     char buff[200];
     int ret, remaining = 0;
-    pwm_t pwm;
     init_pwm(&pwm);
     remaining = req->content_len;
     ret = req->content_len;
@@ -312,24 +348,61 @@ esp_err_t pwm_handler(httpd_req_t *req)
         //  aca irian las funciones de Gaston
         return ESP_OK;
     }
-
-    // const char *response = "Hello, World!";
-    // error = httpd_resp_send(req, response, strlen(response));
-    /*if (error != ESP_OK)
-    {
-        ESP_LOGE(TAG, "ERROR WHILE SENDING RESPONSE");
-    }
-    else
-    {
-        ESP_LOGI(TAG, "RESPONSE SEND SUCCESSFULLY");
-    }*/
 }
+
+esp_err_t red_post_handler(httpd_req_t *req)
+{
+
+    return ESP_OK;
+}
+
+esp_err_t triac_post_handler(httpd_req_t *req)
+{
+
+    return ESP_OK;
+}
+
+esp_err_t vegeflor_post_handler(httpd_req_t *req)
+{
+
+    return ESP_OK;
+}
+
+//----------HANDLERS PARA LEER LOS DATOS------------//
+esp_err_t red_data_handler(httpd_req_t *req)
+{
+
+    return ESP_OK;
+}
+
+esp_err_t pwm_data_handler(httpd_req_t *req)
+{
+    int value = pwm.intensidad;
+    char response[5];
+    sprintf(response, "%d", value);
+    httpd_resp_send(req, response, strlen(response));
+    return ESP_OK;
+}
+
+esp_err_t triac_data_handler(httpd_req_t *req)
+{
+
+    return ESP_OK;
+}
+
+esp_err_t vegeflor_data_handler(httpd_req_t *req)
+{
+
+    return ESP_OK;
+}
+
+//---------FUNCIONES DEL WEBSERVER-------------//
 
 httpd_handle_t start_webserver(void)
 {
     httpd_handle_t server = NULL;
     httpd_config_t config = HTTPD_DEFAULT_CONFIG(); // Configuracion por default del server
-    config.stack_size = 8192;
+    config.stack_size = 16384;
     // Start the httpd server
     ESP_LOGI(TAG, "Starting server on port: '%d'", config.server_port);
     if (httpd_start(&server, &config) == ESP_OK)
@@ -337,8 +410,16 @@ httpd_handle_t start_webserver(void)
         // Set URI handlers
         ESP_LOGI(TAG, "Registering URI handlers");
         // ESP_LOGI(TAG, "Registering HTML");
-        httpd_register_uri_handler(server, &html_uri);
-        httpd_register_uri_handler(server, &pwm_post);
+        httpd_register_uri_handler(server, &index_uri);
+        httpd_register_uri_handler(server, &config_uri);
+        httpd_register_uri_handler(server, &pwm_post_handler);
+        httpd_register_uri_handler(server, &red_post_handler);
+        httpd_register_uri_handler(server, &triac_post_handler);
+        httpd_register_uri_handler(server, &vegeflor_post_handler);
+        httpd_register_uri_handler(server, &red_data_handler);
+        httpd_register_uri_handler(server, &pwm_data_handler);
+        httpd_register_uri_handler(server, &triac_data_handler);
+        httpd_register_uri_handler(server, &vegeflor_data_handler);
         return server;
     }
 
