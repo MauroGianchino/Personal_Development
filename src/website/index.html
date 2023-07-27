@@ -9,77 +9,78 @@
 
 <body>
     <h1>Inicio</h1>
-    <h2>RED</h2>
+
+    <h2>Red</h2>
     <p id="ID">Nombre de red:</p>
     <p id="PASS">Contraseña:</p>
-    <h2>PWM</h2>
+    <h2>Intensidad de luz</h2>
     <p id="PWM_Intensidad">Intensidad:</p>
     <p id="PWM_modo">Modo:</p>
-    <p id="PWM_horarioi">Horario Encendido:</p>
-    <p id="PWM_horariof">Horario Apagado:</p>
-    <p id="PWM_DIA">Simulacion DIA:</p>
-    <h2>TRIAC</h2>
+    <span>Encendido: </span><span id="PWM_horarioi"></span>
+    <span>Apagado: </span><span id="PWM_horariof"></span>
+    <p id="PWM_DIA">Amanecer / Atardecer:</p>
+    <h2>Salida 220V</h2>
     <p id="TRIAC_modo">Modo:</p>
-    Horario 1
-    <p id="TRIAC_horarioi1">Encendido:</p>
-    <p id="TRIAC_horariof1">Apagado:</p>
-    Horario 2
-    <p id="TRIAC_horarioi2">Encendido:</p>
-    <p id="TRIAC_horariof2">Apagado:</p>
-    Horario 3
-    <p id="TRIAC_horarioi3">Encendido:</p>
-    <p id="TRIAC_horariof3">Apagado:</p>
-    Horario 4
-    <p id="TRIAC_horarioi4">Encendido:</p>
-    <p id="TRIAC_horariof4">Apagado:</p>
-    <h2>VEGETACION/FLORACION</h2>
+    <p>Horario 1</p>
+    <span>Encendido: </span><span id="TRIAC_horarioi1"></span>
+    <span>Apagado: </span><span id="TRIAC_horariof1"></span>
+    <p>Horario 2</p>
+    <span>Encendido: </span><span id="TRIAC_horarioi2"></span>
+    <span>Apagado: </span><span id="TRIAC_horariof2"></span>
+    <p>Horario 3</p>
+    <span>Encendido: </span><span id="TRIAC_horarioi3"></span>
+    <span>Apagado: </span><span id="TRIAC_horariof3"></span>
+    <p>Horario 4</p>
+    <span>Encendido: </span><span id="TRIAC_horarioi4"></span>
+    <span>Apagado: </span><span id="TRIAC_horariof4"></span>
+    <h2>Vegetacion/Floracion</h2>
     <p id="VEGEFLOR_modo">Modo:</p>
     <button onclick="window.location.href ='/config'">
         Configuracion
     </button>
 
     <script>
-        window.addEventListener('load', () => {
-            setInterval(() => {
-                fetch("/data_pwm").then(res => {
-                    if (!res.ok)
-                        console.error("Error en adquirir los datos del pwm")
-                    return res.text()
-                }).then(data => {
-                    const integerData = parseInt(data, 10);
-                    console.log(data)
-                    document.getElementById("dataValue").textContent = "Intensidad: " + integerData;
-                })
-                fetch("/data_triac").then(res => {
-                    if (!res.ok)
-                        console.error("Error en adquirir los datos del triac")
-                    return res.text()
-                }).then(data => {
-                    const integerData = parseInt(data, 10);
-                    console.log(data)
-                    document.getElementById("dataValue").textContent = "Intensidad: " + integerData;
-                })
-                fetch("/data_red").then(res => {
-                    if (!res.ok)
-                        console.error("Error en adquirir los datos de red")
-                    return res.text()
-                }).then(data => {
-                    const integerData = parseInt(data, 10);
-                    console.log(data)
-                    document.getElementById("dataValue").textContent = "Intensidad: " + integerData;
-                })
-                fetch("/data_vegeflor").then(res => {
-                    if (!res.ok)
-                        console.error("Error en adquirir los datos de vegeflor")
-                    return res.text()
-                }).then(data => {
-                    const integerData = parseInt(data, 10);
-                    console.log(data)
-                    document.getElementById("dataValue").textContent = "Intensidad: " + integerData;
-                })
+        // window.addEventListener('load', () => {
+        //     setInterval(() => {
+        //         fetch("/data_pwm").then(res => {
+        //             if (!res.ok)
+        //                 console.error("Error en adquirir los datos del pwm")
+        //             return res.text()
+        //         }).then(data => {
+        //             const integerData = parseInt(data, 10);
+        //             console.log(data)
+        //             document.getElementById("dataValue").textContent = "Intensidad: " + integerData;
+        //         })
+        //         fetch("/data_triac").then(res => {
+        //             if (!res.ok)
+        //                 console.error("Error en adquirir los datos del triac")
+        //             return res.text()
+        //         }).then(data => {
+        //             const integerData = parseInt(data, 10);
+        //             console.log(data)
+        //             document.getElementById("dataValue").textContent = "Intensidad: " + integerData;
+        //         })
+        //         fetch("/data_red").then(res => {
+        //             if (!res.ok)
+        //                 console.error("Error en adquirir los datos de red")
+        //             return res.text()
+        //         }).then(data => {
+        //             const integerData = parseInt(data, 10);
+        //             console.log(data)
+        //             document.getElementById("dataValue").textContent = "Intensidad: " + integerData;
+        //         })
+        //         fetch("/data_vegeflor").then(res => {
+        //             if (!res.ok)
+        //                 console.error("Error en adquirir los datos de vegeflor")
+        //             return res.text()
+        //         }).then(data => {
+        //             const integerData = parseInt(data, 10);
+        //             console.log(data)
+        //             document.getElementById("dataValue").textContent = "Intensidad: " + integerData;
+        //         })
 
-            }, 500)
-        })
+        //     }, 500)
+        // })
 
     </script>
 </body>

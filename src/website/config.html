@@ -36,15 +36,15 @@
         </select><br><br>
 
         <label>Encendido:</label>
-        <input type="time" id="pwm_hi" name="pwm_hi" value="00:00" disabled>
-
+        <input type="time" id="ih_pwm" name="ih_pwm" value="00:00" disabled>
+        <br><br>
         <label>Apagado:</label>
-        <input type="time" id="pwm_fi" name="pwm_fi" value="00:00" disabled><br><br>
+        <input type="time" id="fh_pwm" name="fh_pwm" value="00:00" disabled><br><br>
 
-        <label>Simulacion DIA:</label>
+        <label>Amanecer / Atardecer:</label>
         <select id="opciones" name="Opciones">
-            <option value="ON">ON</option>
-            <option value="OFF">OFF</option>
+            <option value="SI">SI</option>
+            <option value="NO">NO</option>
         </select><br><br>
 
         <input type="submit" value="Actualizar">
@@ -54,9 +54,9 @@
     <form action="/triac" method="post">
         <label>Modo:</label>
         <select id="modos_triac" name="modos_triac" onchange="deshabilitarCheckboxs()">
-            <option value="ON">ON</option>
+            <option value="SI">SI</option>
             <option value="Automatico">AUTO</option>
-            <option value="OFF">OFF</option>
+            <option value="NO">NO</option>
         </select><br><br>
         <label>Habilitar Horario 1:</label>
         <input type="checkbox" id="checkboxh1" name="checkboxh1"
@@ -64,6 +64,7 @@
 
         <label>Encendido:</label>
         <input type="time" id="ih1" name="ih1" value="00:00" disabled>
+        <br><br>
 
         <label>Apagado:</label>
         <input type="time" id="fh1" name="fh1" value="00:00" disabled><br><br>
@@ -74,6 +75,7 @@
 
         <label>Encendido:</label>
         <input type="time" id="ih2" name="ih2" value="00:00" disabled>
+        <br><br>
 
         <label>Apagado:</label>
         <input type="time" id="fh2" name="fh2" value="00:00" disabled><br><br>
@@ -84,6 +86,7 @@
 
         <label>Encendido:</label>
         <input type="time" id="ih3" name="ih3" value="00:00" disabled>
+        <br><br>
 
         <label>Apagado:</label>
         <input type="time" id="fh3" name="fh3" value="00:00" disabled><br><br>
@@ -94,6 +97,7 @@
 
         <label>Encendido:</label>
         <input type="time" id="ih4" name="ih4" value="00:00" disabled>
+        <br><br>
 
         <label>Apagado:</label>
         <input type="time" id="fh4" name="fh4" value="00:00" disabled><br><br>
@@ -101,7 +105,7 @@
         <input type="submit" value="Actualizar">
 
     </form>
-    <h2>VEGE/FLORA</h2>
+    <h2>Vegetacion/Floracion</h2>
     <form action="/vegeflor" method="post">
 
         <label>Modo:</label>
@@ -113,27 +117,16 @@
         <input type="submit" value="Actualizar">
 
     </form>
+    <br><br>
+    <button onclick="window.location.href ='/index'">
+        Volver a inicio
+    </button>
     <script>
-        window.addEventListener('load', () => {
-            setInterval(() => {
-                fetch("/data").then(res => {
-                    if (!res.ok)
-                        console.error("ESP NO RESPONDIO BIEN")
-
-                    return res.text()
-                }).then(data => {
-                    const integerData = parseInt(data, 10);
-                    console.log(data)
-                    document.getElementById("dataValue").textContent = "Intensidad: " + integerData;
-                })
-            }, 500)
-        })
-
         function habilitarHorario() {
             var selectElement = document.getElementById("modos_pwm");
             var selectedValue = selectElement.value;
-            const horarioInput_i = document.getElementById("pwm_hi");
-            const horarioInput_f = document.getElementById("pwm_fi");
+            const horarioInput_i = document.getElementById("ih_pwm");
+            const horarioInput_f = document.getElementById("fh_pwm");
 
             // Ejecutar una función específica para cada opción
             if (selectedValue == "Automatico") {
