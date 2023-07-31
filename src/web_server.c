@@ -444,15 +444,28 @@ void parse_red(char *buff, red_t *red)
     // el & es el separador de los campos
     ESP_LOGI(TAG, "Testeo del parseo de RED");
     char *e;
+    int j = 0;
     int len = strlen(buff);
-    int index;
+    int index_amp;
     int equalIndex = 6;
     e = strchr(buff, '&');
-    index = (int)(e - buff);
-    int secondEqualIndex = index + 12;
-    ESP_LOGW(TAG, "%d", index);
-    strncpy(red->ID, buff + equalIndex + 1, index - equalIndex - 1);
-    strncpy(red->PASS, buff + secondEqualIndex + 1, len - secondEqualIndex - 1);
+    index_amp = (int)(e - buff);
+    int secondEqualIndex = index_amp + 12;
+    ESP_LOGW(TAG, "%d", index_amp);
+    for (int i = equalIndex + 1; i < index_amp; i++)
+    {
+        red->ID[j] = buff[i];
+        j++;
+    }
+    red->ID[j] = '\0';
+    j = 0;
+    for (int i = secondEqualIndex + 1; i <= len; i++)
+    {
+        red->PASS[j] = buff[i];
+        j++;
+    }
+    // strncpy(red->ID, buff + equalIndex + 1, index - equalIndex - 1);
+    // strncpy(red->PASS, buff + secondEqualIndex + 1, len - secondEqualIndex - 1);
 
     ESP_LOGI(TAG, "Salgo del parseo de RED");
 };
@@ -620,6 +633,7 @@ esp_err_t red_post_handler(httpd_req_t *req)
 {
     ESP_LOGI(TAG, "ENTRE AL HANDLER DE LA RED");
     char buff[50];
+    memset(buff, '\0', sizeof(buff));
     int ret, remaining = 0;
     remaining = req->content_len;
     ret = req->content_len;

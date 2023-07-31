@@ -20,7 +20,7 @@
 #include "esp_mac.h"
 #include "wifi_ap.h"
 
-#define EXAMPLE_ESP_WIFI_SSID "Red_H"
+#define EXAMPLE_ESP_WIFI_SSID "Red_Hor"
 #define EXAMPLE_ESP_WIFI_PASS "Horti2505"
 #define EXAMPLE_ESP_WIFI_CHANNEL 1
 #define EXAMPLE_MAX_STA_CONN 10
