@@ -20,8 +20,8 @@
 #include "esp_mac.h"
 #include "wifi_ap.h"
 
-#define EXAMPLE_ESP_WIFI_SSID "MiRed_esp32"
-#define EXAMPLE_ESP_WIFI_PASS "Horticultura"
+#define EXAMPLE_ESP_WIFI_SSID "Red_H"
+#define EXAMPLE_ESP_WIFI_PASS "Horti2505"
 #define EXAMPLE_ESP_WIFI_CHANNEL 1
 #define EXAMPLE_MAX_STA_CONN 10
 #define TAG "WIFI AP"
@@ -72,7 +72,15 @@ void wifi_init_softap(void)
             .channel = EXAMPLE_ESP_WIFI_CHANNEL,
             .password = EXAMPLE_ESP_WIFI_PASS,
             .max_connection = EXAMPLE_MAX_STA_CONN,
-
+#ifdef CONFIG_ESP_WIFI_SOFTAP_SAE_SUPPORT
+            .authmode = WIFI_AUTH_WPA3_PSK,
+            .sae_pwe_h2e = WPA3_SAE_PWE_BOTH,
+#else /* CONFIG_ESP_WIFI_SOFTAP_SAE_SUPPORT */
+            .authmode = WIFI_AUTH_WPA2_PSK,
+#endif
+            .pmf_cfg = {
+                .required = true,
+            },
         },
     };
     if (strlen(EXAMPLE_ESP_WIFI_PASS) == 0)
@@ -84,7 +92,7 @@ void wifi_init_softap(void)
     ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_AP, &wifi_config));
 
     /* DHCP AP configuration */
-    //esp_netif_dhcps_stop(esp_netif_ap); /* DHCP client/server must be stopped before setting new IP information. */
+    // esp_netif_dhcps_stop(esp_netif_ap); /* DHCP client/server must be stopped before setting new IP information. */
     /*esp_netif_ip_info_t ap_ip_info;
     memset(&ap_ip_info, 0x00, sizeof(ap_ip_info));
     inet_pton(AF_INET, DEFAULT_AP_IP, &ap_ip_info.ip);
