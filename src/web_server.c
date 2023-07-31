@@ -23,6 +23,8 @@ static const char *TAG = "WEBSERVER";
 static const char *PWM = "PWM";
 static const char *TRIAC = "TRIAC";
 static const char *VEGEFLOR = "VEGEFLOR";
+static const char *VERSION = "VERSION";
+static const char *HORA = "HORA";
 
 red_t red;
 
@@ -32,6 +34,11 @@ triac_t triac;
 
 vegeflor_t vegeflor;
 
+version_t version;
+
+hora_t hora;
+
+//----------FUNCIONES------------//
 void init_pwm(pwm_t *pwm)
 {
     pwm->intensidad = -1;
@@ -71,6 +78,28 @@ void init_triac(triac_t *triac)
 void init_vegeflor(vegeflor_t *vegeflor)
 {
     vegeflor->modo = FLOR;
+}
+
+void init_red(red_t *red)
+{
+    memset(red->ID, '\0', sizeof(red->ID));
+    strcpy(red->ID, "-");
+    memset(red->PASS, '\0', sizeof(red->PASS));
+    strcpy(red->PASS, "-");
+}
+
+void init_version(version_t *version)
+{
+    version->hw = -1;
+
+    version->bgs = -1;
+}
+
+void init_hora(hora_t *hora)
+{
+    hora->hr.h = -1;
+
+    hora->hr.m = -1;
 }
 
 void print_pwm(pwm_t *pwm)
@@ -116,35 +145,35 @@ void print_triac(triac_t *triac)
     }
     if (triac->checkh1 == pdFALSE)
     {
-        ESP_LOGW(TAG, "HORARIO DESHABILITADO");
+        ESP_LOGW(TAG, "HORARIO 1 DESHABILITADO");
     }
     else
     {
-        ESP_LOGW(TAG, "HORARIO HABILITADO");
+        ESP_LOGW(TAG, "HORARIO 1 HABILITADO");
     }
     if (triac->checkh2 == pdFALSE)
     {
-        ESP_LOGW(TAG, "HORARIO DESHABILITADO");
+        ESP_LOGW(TAG, "HORARIO 2 DESHABILITADO");
     }
     else
     {
-        ESP_LOGW(TAG, "HORARIO HABILITADO");
+        ESP_LOGW(TAG, "HORARIO 2 HABILITADO");
     }
     if (triac->checkh3 == pdFALSE)
     {
-        ESP_LOGW(TAG, "HORARIO DESHABILITADO");
+        ESP_LOGW(TAG, "HORARIO 3 DESHABILITADO");
     }
     else
     {
-        ESP_LOGW(TAG, "HORARIO HABILITADO");
+        ESP_LOGW(TAG, "HORARIO 3 HABILITADO");
     }
     if (triac->checkh4 == pdFALSE)
     {
-        ESP_LOGW(TAG, "HORARIO DESHABILITADO");
+        ESP_LOGW(TAG, "HORARIO 4 DESHABILITADO");
     }
     else
     {
-        ESP_LOGW(TAG, "HORARIO HABILITADO");
+        ESP_LOGW(TAG, "HORARIO 4 HABILITADO");
     }
 }
 
@@ -153,12 +182,26 @@ void print_vegeflor(vegeflor_t *vegeflor)
 
     if (vegeflor->modo == VEGE)
     {
-        ESP_LOGW(TAG, "VEGETACION");
+        ESP_LOGW(TAG, "MODO VEGETACION");
     }
     else
     {
-        ESP_LOGW(TAG, "FLORACION");
+        ESP_LOGW(TAG, "MODO FLORACION");
     }
+}
+
+void print_red(red_t *red)
+{
+
+    ESP_LOGW(TAG, "ID:%s", red->ID);
+
+    ESP_LOGW(TAG, "PASS:%s", red->PASS);
+}
+
+void print_hora(hora_t *hora)
+{
+
+    ESP_LOGW(HORA, "Hora: %d:%d", hora->hr.h, hora->hr.m);
 }
 
 void analyze_token_pwm(char *token, pwm_t *pwm)
@@ -393,9 +436,39 @@ void parse_vegeflor(char *buff, vegeflor_t *vegeflor)
     {
         ESP_LOGE(VEGEFLOR, "Error en parseo del MODO");
     }
-    ESP_LOGI(PWM, "Salgo del parseo");
+    ESP_LOGI(VEGEFLOR, "Salgo del parseo");
 };
 
+void parse_red(char *buff, red_t *red)
+{
+    // el & es el separador de los campos
+    ESP_LOGI(TAG, "Testeo del parseo de RED");
+    char *e;
+    int len = strlen(buff);
+    int index;
+    int equalIndex = 6;
+    e = strchr(buff, '&');
+    index = (int)(e - buff);
+    int secondEqualIndex = index + 12;
+    ESP_LOGW(TAG, "%d", index);
+    strncpy(red->ID, buff + equalIndex + 1, index - equalIndex - 1);
+    strncpy(red->PASS, buff + secondEqualIndex + 1, len - secondEqualIndex - 1);
+
+    ESP_LOGI(TAG, "Salgo del parseo de RED");
+};
+
+void parse_hora(char *buff, hora_t *hora)
+{
+    // el & es el separador de los campos
+    ESP_LOGI(HORA, "Testeo del parseo de HORA");
+
+    hora->hr.h = atoi(&buff[5]);
+    hora->hr.m = atoi(&buff[10]);
+
+    ESP_LOGI(HORA, "Salgo del parseo HORA");
+};
+
+//----------URL´S------------//
 httpd_uri_t index_uri = {
     .uri = "/index",
     .method = HTTP_GET,
@@ -432,6 +505,12 @@ httpd_uri_t vegeflor_post = {
     .handler = vegeflor_post_handler,
     .user_ctx = NULL};
 
+httpd_uri_t hora_post = {
+    .uri = "/hora",
+    .method = HTTP_POST,
+    .handler = hora_post_handler,
+    .user_ctx = NULL};
+
 httpd_uri_t data_red_uri = {
     .uri = "/data_red",
     .method = HTTP_GET,
@@ -454,6 +533,18 @@ httpd_uri_t data_vegeflor_uri = {
     .uri = "/data_vegeflor",
     .method = HTTP_GET,
     .handler = vegeflor_data_handler,
+    .user_ctx = NULL};
+
+httpd_uri_t version_data_uri = {
+    .uri = "/version",
+    .method = HTTP_GET,
+    .handler = version_data_handler,
+    .user_ctx = NULL};
+
+httpd_uri_t hora_data_uri = {
+    .uri = "/data_hora",
+    .method = HTTP_GET,
+    .handler = hora_data_handler,
     .user_ctx = NULL};
 
 //----------HANDLERS PARA LOS HTML------------//
@@ -527,6 +618,43 @@ esp_err_t pwm_post_handler(httpd_req_t *req)
 
 esp_err_t red_post_handler(httpd_req_t *req)
 {
+    ESP_LOGI(TAG, "ENTRE AL HANDLER DE LA RED");
+    char buff[50];
+    int ret, remaining = 0;
+    remaining = req->content_len;
+    ret = req->content_len;
+    ESP_LOGI(TAG, "%d", ret);
+    ESP_LOGI(TAG, "%d", remaining);
+    if (remaining >= sizeof(buff))
+    {
+        /* Buffer de datos insuficiente */
+        ESP_LOGI(TAG, "PAYLOAD MUY GRANDE");
+        httpd_resp_send_err(req, HTTPD_400_BAD_REQUEST, "Payload too large");
+        return ESP_FAIL;
+    }
+    else
+    {
+        while (remaining > 0)
+        {
+            /* Leer los datos del formulario */
+            ret = httpd_req_recv(req, buff, sizeof(buff)); // en buff se pone lo que estaba en el req y devuelve el numero de bytes que se pasaron al buffer
+            if (ret <= 0)                                  // si es 0 o menor es que hubo error
+            {
+                if (ret == HTTPD_SOCK_ERR_TIMEOUT)
+                {
+                    /* El tiempo de espera para recibir los datos ha expirado */
+                    httpd_resp_send_408(req);
+                }
+                return ESP_FAIL;
+            }
+            remaining -= ret; // resto la cantidad que se pasaron para pasar en el siguiente ciclo el resto. aca cuidado porque los esstaria sobrescribiendo
+            // Procesar los datos recibidos, por ejemplo, almacenarlos en una variable
+        }
+        ESP_LOGI(TAG, "%s", buff);
+        parse_red(buff, &red);
+        print_red(&red);
+        ESP_LOGI(TAG, "Salgo del RED HANDLER");
+    }
 
     return ESP_OK;
 }
@@ -587,7 +715,7 @@ esp_err_t vegeflor_post_handler(httpd_req_t *req)
     if (remaining >= sizeof(buff))
     {
         /* Buffer de datos insuficiente */
-        ESP_LOGI(TRIAC, "PAYLOAD MUY GRANDE");
+        ESP_LOGI(VEGEFLOR, "PAYLOAD MUY GRANDE");
         httpd_resp_send_err(req, HTTPD_400_BAD_REQUEST, "Payload too large");
         return ESP_FAIL;
     }
@@ -619,30 +747,296 @@ esp_err_t vegeflor_post_handler(httpd_req_t *req)
     }
 }
 
+esp_err_t hora_post_handler(httpd_req_t *req)
+{
+    ESP_LOGI(TAG, "ENTRE AL HANDLER DE LA HORA");
+    char buff[30];
+    int ret, remaining = 0;
+    remaining = req->content_len;
+    ret = req->content_len;
+    ESP_LOGI(TAG, "%d", ret);
+    ESP_LOGI(TAG, "%d", remaining);
+    if (remaining >= sizeof(buff))
+    {
+        /* Buffer de datos insuficiente */
+        ESP_LOGI(VEGEFLOR, "PAYLOAD MUY GRANDE");
+        httpd_resp_send_err(req, HTTPD_400_BAD_REQUEST, "Payload too large");
+        return ESP_FAIL;
+    }
+    else
+    {
+        while (remaining > 0)
+        {
+            /* Leer los datos del formulario */
+            ret = httpd_req_recv(req, buff, sizeof(buff)); // en buff se pone lo que estaba en el req y devuelve el numero de bytes que se pasaron al buffer
+            if (ret <= 0)                                  // si es 0 o menor es que hubo error
+            {
+                if (ret == HTTPD_SOCK_ERR_TIMEOUT)
+                {
+                    /* El tiempo de espera para recibir los datos ha expirado */
+                    httpd_resp_send_408(req);
+                }
+                return ESP_FAIL;
+            }
+            remaining -= ret; // resto la cantidad que se pasaron para pasar en el siguiente ciclo el resto. aca cuidado porque los esstaria sobrescribiendo
+            // Procesar los datos recibidos, por ejemplo, almacenarlos en una variable
+        }
+        ESP_LOGI(TAG, "%s", buff);
+        parse_hora(buff, &hora);
+        print_hora(&hora);
+        ESP_LOGI(TAG, "Salgo del HORA HANDLER");
+
+        //  aca irian las funciones de Gaston
+        return ESP_OK;
+    }
+}
+
 //----------HANDLERS PARA LEER LOS DATOS------------//
 esp_err_t red_data_handler(httpd_req_t *req)
 {
+
+    cJSON *json_object = cJSON_CreateObject();
+
+    cJSON_AddStringToObject(json_object, "ID", red.ID);
+    cJSON_AddStringToObject(json_object, "PASS", red.PASS);
+
+    char *json_str = cJSON_Print(json_object);
+    ESP_LOGI(TAG, "JSON ES: %s", json_str);
+    cJSON_Delete(json_object);
+
+    httpd_resp_set_type(req, "application/json");
+    httpd_resp_send(req, json_str, strlen(json_str));
+
+    free(json_str);
 
     return ESP_OK;
 }
 
 esp_err_t pwm_data_handler(httpd_req_t *req)
 {
-    int value = pwm.intensidad;
-    char response[5];
-    sprintf(response, "%d", value);
-    httpd_resp_send(req, response, strlen(response));
+    char *modo;
+    cJSON *json_object = cJSON_CreateObject();
+    cJSON_AddNumberToObject(json_object, "intensidad", pwm.intensidad);
+    cJSON_AddNumberToObject(json_object, "ih1h", pwm.ih1.h);
+    cJSON_AddNumberToObject(json_object, "ih1m", pwm.ih1.m);
+    cJSON_AddNumberToObject(json_object, "fh1h", pwm.fh1.h);
+    cJSON_AddNumberToObject(json_object, "fh1m", pwm.fh1.m);
+    if (pwm.modo == MANUAL)
+    {
+        modo = "Manual";
+    }
+    else
+    {
+        modo = "Automatico";
+    }
+    cJSON_AddStringToObject(json_object, "Modo", modo);
+    if (pwm.dia == pdTRUE)
+    {
+        modo = "Si";
+    }
+    else
+    {
+        modo = "No";
+    }
+    cJSON_AddStringToObject(json_object, "DIA", modo);
+
+    char *json_str = cJSON_Print(json_object);
+    ESP_LOGI(TAG, "JSON ES: %s", json_str);
+    cJSON_Delete(json_object);
+
+    httpd_resp_set_type(req, "application/json");
+    httpd_resp_send(req, json_str, strlen(json_str));
+
+    free(json_str);
     return ESP_OK;
 }
 
 esp_err_t triac_data_handler(httpd_req_t *req)
 {
+    char *modo;
+    cJSON *json_object = cJSON_CreateObject();
+    if (triac.modo == SI)
+    {
+        modo = "Encendido";
+        cJSON_AddStringToObject(json_object, "Modo", modo);
+        cJSON_AddStringToObject(json_object, "ih1h", "-");
+        cJSON_AddStringToObject(json_object, "ih1m", "-");
+        cJSON_AddStringToObject(json_object, "fh1h", "-");
+        cJSON_AddStringToObject(json_object, "fh1m", "-");
+        //
+        cJSON_AddStringToObject(json_object, "ih2h", "-");
+        cJSON_AddStringToObject(json_object, "ih2m", "-");
+        cJSON_AddStringToObject(json_object, "fh2h", "-");
+        cJSON_AddStringToObject(json_object, "fh2m", "-");
+        //
+        cJSON_AddStringToObject(json_object, "ih3h", "-");
+        cJSON_AddStringToObject(json_object, "ih3m", "-");
+        cJSON_AddStringToObject(json_object, "fh3h", "-");
+        cJSON_AddStringToObject(json_object, "fh3m", "-");
+        //
+        cJSON_AddStringToObject(json_object, "ih4h", "-");
+        cJSON_AddStringToObject(json_object, "ih4m", "-");
+        cJSON_AddStringToObject(json_object, "fh4h", "-");
+        cJSON_AddStringToObject(json_object, "fh4m", "-");
+    }
+    else if (triac.modo == NO)
+    {
+        modo = "Apagado";
+        cJSON_AddStringToObject(json_object, "Modo", modo);
+        cJSON_AddStringToObject(json_object, "ih1h", "-");
+        cJSON_AddStringToObject(json_object, "ih1m", "-");
+        cJSON_AddStringToObject(json_object, "fh1h", "-");
+        cJSON_AddStringToObject(json_object, "fh1m", "-");
+        //
+        cJSON_AddStringToObject(json_object, "ih2h", "-");
+        cJSON_AddStringToObject(json_object, "ih2m", "-");
+        cJSON_AddStringToObject(json_object, "fh2h", "-");
+        cJSON_AddStringToObject(json_object, "fh2m", "-");
+        //
+        cJSON_AddStringToObject(json_object, "ih3h", "-");
+        cJSON_AddStringToObject(json_object, "ih3m", "-");
+        cJSON_AddStringToObject(json_object, "fh3h", "-");
+        cJSON_AddStringToObject(json_object, "fh3m", "-");
+        //
+        cJSON_AddStringToObject(json_object, "ih4h", "-");
+        cJSON_AddStringToObject(json_object, "ih4m", "-");
+        cJSON_AddStringToObject(json_object, "fh4h", "-");
+        cJSON_AddStringToObject(json_object, "fh4m", "-");
+    }
+    else
+    {
+        modo = "Automatico";
+        cJSON_AddStringToObject(json_object, "Modo", modo);
+        if (triac.checkh1 == pdTRUE)
+        {
+            cJSON_AddNumberToObject(json_object, "ih1h", triac.ih1.h);
+            cJSON_AddNumberToObject(json_object, "ih1m", triac.ih1.m);
+            cJSON_AddNumberToObject(json_object, "fh1h", triac.fh1.h);
+            cJSON_AddNumberToObject(json_object, "fh1m", triac.fh1.m);
+        }
+        else
+        {
+            cJSON_AddStringToObject(json_object, "ih1h", "-");
+            cJSON_AddStringToObject(json_object, "ih1m", "-");
+            cJSON_AddStringToObject(json_object, "fh1h", "-");
+            cJSON_AddStringToObject(json_object, "fh1m", "-");
+        }
+        if (triac.checkh2 == pdTRUE)
+        {
+            cJSON_AddNumberToObject(json_object, "ih2h", triac.ih2.h);
+            cJSON_AddNumberToObject(json_object, "ih2m", triac.ih2.m);
+            cJSON_AddNumberToObject(json_object, "fh2h", triac.fh2.h);
+            cJSON_AddNumberToObject(json_object, "fh2m", triac.fh2.m);
+        }
+        else
+        {
+            cJSON_AddStringToObject(json_object, "ih2h", "-");
+            cJSON_AddStringToObject(json_object, "ih2m", "-");
+            cJSON_AddStringToObject(json_object, "fh2h", "-");
+            cJSON_AddStringToObject(json_object, "fh2m", "-");
+        }
+        if (triac.checkh3 == pdTRUE)
+        {
+            cJSON_AddNumberToObject(json_object, "ih3h", triac.ih3.h);
+            cJSON_AddNumberToObject(json_object, "ih3m", triac.ih3.m);
+            cJSON_AddNumberToObject(json_object, "fh3h", triac.fh3.h);
+            cJSON_AddNumberToObject(json_object, "fh3m", triac.fh3.m);
+        }
+        else
+        {
+            cJSON_AddStringToObject(json_object, "ih3h", "-");
+            cJSON_AddStringToObject(json_object, "ih3m", "-");
+            cJSON_AddStringToObject(json_object, "fh3h", "-");
+            cJSON_AddStringToObject(json_object, "fh3m", "-");
+        }
+        if (triac.checkh4 == pdTRUE)
+        {
+            cJSON_AddNumberToObject(json_object, "ih4h", triac.ih4.h);
+            cJSON_AddNumberToObject(json_object, "ih4m", triac.ih4.m);
+            cJSON_AddNumberToObject(json_object, "fh4h", triac.fh4.h);
+            cJSON_AddNumberToObject(json_object, "fh4m", triac.fh4.m);
+        }
+        else
+        {
+            cJSON_AddStringToObject(json_object, "ih4h", "-");
+            cJSON_AddStringToObject(json_object, "ih4m", "-");
+            cJSON_AddStringToObject(json_object, "fh4h", "-");
+            cJSON_AddStringToObject(json_object, "fh4m", "-");
+        }
+    }
+
+    char *json_str = cJSON_Print(json_object);
+    ESP_LOGI(TAG, "JSON ES: %s", json_str);
+    cJSON_Delete(json_object);
+
+    httpd_resp_set_type(req, "application/json");
+    httpd_resp_send(req, json_str, strlen(json_str));
+
+    free(json_str);
 
     return ESP_OK;
 }
 
 esp_err_t vegeflor_data_handler(httpd_req_t *req)
 {
+    char *modo;
+    cJSON *json_object = cJSON_CreateObject();
+    if (vegeflor.modo == VEGE)
+    {
+        modo = "Vegetacion";
+    }
+    else
+    {
+        modo = "Floracion";
+    }
+    cJSON_AddStringToObject(json_object, "Modo", modo);
+
+    char *json_str = cJSON_Print(json_object);
+    ESP_LOGI(TAG, "JSON ES: %s", json_str);
+    cJSON_Delete(json_object);
+
+    httpd_resp_set_type(req, "application/json");
+    httpd_resp_send(req, json_str, strlen(json_str));
+
+    free(json_str);
+
+    return ESP_OK;
+}
+
+esp_err_t version_data_handler(httpd_req_t *req)
+{
+    cJSON *json_object = cJSON_CreateObject();
+
+    cJSON_AddNumberToObject(json_object, "Hardware", version.hw);
+    cJSON_AddNumberToObject(json_object, "Bugs", version.bgs);
+
+    char *json_str = cJSON_Print(json_object);
+    ESP_LOGI(TAG, "JSON ES: %s", json_str);
+    cJSON_Delete(json_object);
+
+    httpd_resp_set_type(req, "application/json");
+    httpd_resp_send(req, json_str, strlen(json_str));
+
+    free(json_str);
+
+    return ESP_OK;
+}
+
+esp_err_t hora_data_handler(httpd_req_t *req)
+{
+    cJSON *json_object = cJSON_CreateObject();
+
+    cJSON_AddNumberToObject(json_object, "Hora_h", hora.hr.h);
+    cJSON_AddNumberToObject(json_object, "Hora_m", hora.hr.m);
+
+    char *json_str = cJSON_Print(json_object);
+    ESP_LOGI(TAG, "JSON ES: %s", json_str);
+    cJSON_Delete(json_object);
+
+    httpd_resp_set_type(req, "application/json");
+    httpd_resp_send(req, json_str, strlen(json_str));
+
+    free(json_str);
 
     return ESP_OK;
 }
@@ -654,7 +1048,7 @@ httpd_handle_t start_webserver(void)
     httpd_handle_t server = NULL;
     httpd_config_t config = HTTPD_DEFAULT_CONFIG(); // Configuracion por default del server
     config.stack_size = 16384;
-    config.max_uri_handlers = 10;
+    config.max_uri_handlers = 15;
     // Start the httpd server
     ESP_LOGI(TAG, "Starting server on port: '%d'", config.server_port);
     if (httpd_start(&server, &config) == ESP_OK)
@@ -672,12 +1066,21 @@ httpd_handle_t start_webserver(void)
         httpd_register_uri_handler(server, &data_pwm_uri);
         httpd_register_uri_handler(server, &data_triac_uri);
         httpd_register_uri_handler(server, &data_vegeflor_uri);
+        httpd_register_uri_handler(server, &version_data_uri);
+        httpd_register_uri_handler(server, &hora_data_uri);
+        httpd_register_uri_handler(server, &hora_post);
+        ESP_LOGI("RED", "INICIO VARIABLE RED");
+        init_red(&red);
         ESP_LOGI(PWM, "INICIO VARIABLE PWM");
         init_pwm(&pwm);
         ESP_LOGI(TRIAC, "INICIO VARIABLE TRIAC");
         init_triac(&triac);
         ESP_LOGI(VEGEFLOR, "INICIO VARIABLE VEGEFLOR");
         init_vegeflor(&vegeflor);
+        ESP_LOGI(VERSION, "INICIO VARIABLE VERSION");
+        init_version(&version);
+        ESP_LOGI(HORA, "INICIO VARIABLE HORA");
+        init_hora(&hora);
         return server;
     }
 

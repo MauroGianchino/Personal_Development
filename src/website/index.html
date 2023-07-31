@@ -9,78 +9,126 @@
 
 <body>
     <h1>Inicio</h1>
-
+    <strong>Hora: </strong><span id="Hora_h"></span>:<span id="Hora_m"></span>
     <h2>Red</h2>
-    <p id="ID">Nombre de red:</p>
-    <p id="PASS">Contraseña:</p>
+    <span><strong>Nombre de la Red:</strong> </span><span id="ID"></span>
+    <br><br>
+    <span><strong>Contraseña de la Red:</strong> </span><span id="PASS"></span>
     <h2>Intensidad de luz</h2>
-    <p id="PWM_Intensidad">Intensidad:</p>
-    <p id="PWM_modo">Modo:</p>
-    <span>Encendido: </span><span id="PWM_horarioi"></span>
-    <span>Apagado: </span><span id="PWM_horariof"></span>
-    <p id="PWM_DIA">Amanecer / Atardecer:</p>
+    <span><strong>Intesidad:</strong> </span><span id="PWM_Intensidad"></span>
+    <br><br>
+    <span><strong>Modo:</strong> </span><span id="PWM_modo"></span>
+    <br><br>
+    <span><strong>Encendido:</strong> </span><span id="PWM_horarioih"></span>:<span id="PWM_horarioim"></span>
+    <br><br>
+    <span><strong>Apagado:</strong> </span><span id="PWM_horariofh"></span>:<span id="PWM_horariofm"></span>
+    <br><br>
+    <span><strong>Amanecer / Atardecer:</strong> </span><span id="PWM_DIA"></span>
+    <br><br>
     <h2>Salida 220V</h2>
-    <p id="TRIAC_modo">Modo:</p>
+    <span><strong>Modo:</strong> </span><span id="TRIAC_modo"></span>
+    <br><br>
     <p>Horario 1</p>
-    <span>Encendido: </span><span id="TRIAC_horarioi1"></span>
-    <span>Apagado: </span><span id="TRIAC_horariof1"></span>
+    <span><strong>Encendido:</strong> </span><span id="TRIAC_horarioi1_h"></span>:<span id="TRIAC_horarioi1_m"></span>
+    <span><strong>Apagado:</strong> </span><span id="TRIAC_horariof1_h"></span>:<span id="TRIAC_horariof1_m"></span>
     <p>Horario 2</p>
-    <span>Encendido: </span><span id="TRIAC_horarioi2"></span>
-    <span>Apagado: </span><span id="TRIAC_horariof2"></span>
+    <span><strong>Encendido:</strong> </span><span id="TRIAC_horarioi2_h"></span>:<span id="TRIAC_horarioi2_m"></span>
+    <span><strong>Apagado:</strong> </span><span id="TRIAC_horariof2_h"></span>:<span id="TRIAC_horariof2_m"></span>
     <p>Horario 3</p>
-    <span>Encendido: </span><span id="TRIAC_horarioi3"></span>
-    <span>Apagado: </span><span id="TRIAC_horariof3"></span>
+    <span><strong>Encendido:</strong> </span><span id="TRIAC_horarioi3_h"></span>:<span id="TRIAC_horarioi3_m"></span>
+    <span><strong>Apagado:</strong> </span><span id="TRIAC_horariof3_h"></span>:<span id="TRIAC_horariof3_m"></span>
     <p>Horario 4</p>
-    <span>Encendido: </span><span id="TRIAC_horarioi4"></span>
-    <span>Apagado: </span><span id="TRIAC_horariof4"></span>
+    <span><strong>Encendido:</strong> </span><span id="TRIAC_horarioi4_h"></span>:<span id="TRIAC_horarioi4_m"></span>
+    <span><strong>Apagado:</strong> </span><span id="TRIAC_horariof4_h"></span>:<span id="TRIAC_horariof4_m"></span>
     <h2>Vegetacion/Floracion</h2>
-    <p id="VEGEFLOR_modo">Modo:</p>
+    <span><strong>Modo:</strong> </span><span id="VEGEFLOR_modo"></span>
+    <br><br>
     <button onclick="window.location.href ='/config'">
         Configuracion
     </button>
+    <br><br>
+    <span><strong>Versión:</strong> </span><span id="Version_hw"></span>.</span><span id="Version_bgs"></span>
+
 
     <script>
-        // window.addEventListener('load', () => {
-        //     setInterval(() => {
-        //         fetch("/data_pwm").then(res => {
-        //             if (!res.ok)
-        //                 console.error("Error en adquirir los datos del pwm")
-        //             return res.text()
-        //         }).then(data => {
-        //             const integerData = parseInt(data, 10);
-        //             console.log(data)
-        //             document.getElementById("dataValue").textContent = "Intensidad: " + integerData;
-        //         })
-        //         fetch("/data_triac").then(res => {
-        //             if (!res.ok)
-        //                 console.error("Error en adquirir los datos del triac")
-        //             return res.text()
-        //         }).then(data => {
-        //             const integerData = parseInt(data, 10);
-        //             console.log(data)
-        //             document.getElementById("dataValue").textContent = "Intensidad: " + integerData;
-        //         })
-        //         fetch("/data_red").then(res => {
-        //             if (!res.ok)
-        //                 console.error("Error en adquirir los datos de red")
-        //             return res.text()
-        //         }).then(data => {
-        //             const integerData = parseInt(data, 10);
-        //             console.log(data)
-        //             document.getElementById("dataValue").textContent = "Intensidad: " + integerData;
-        //         })
-        //         fetch("/data_vegeflor").then(res => {
-        //             if (!res.ok)
-        //                 console.error("Error en adquirir los datos de vegeflor")
-        //             return res.text()
-        //         }).then(data => {
-        //             const integerData = parseInt(data, 10);
-        //             console.log(data)
-        //             document.getElementById("dataValue").textContent = "Intensidad: " + integerData;
-        //         })
+        window.addEventListener('load', () => {
+            fetch("/data_hora").then(res => {
+                if (!res.ok)
+                    console.error("Error en adquirir los datos de la hora")
+                return res.json()
+            }).then(data => {
+                console.log(data)
+                document.getElementById("Hora_h").textContent = data.Hora_h;
+                document.getElementById("Hora_m").textContent = data.Hora_m;
+            })
+            fetch("/version").then(res => {
+                if (!res.ok)
+                    console.error("Error en adquirir los datos de version")
+                return res.json()
+            }).then(data => {
+                console.log(data)
+                document.getElementById("Version_hw").textContent = data.Hardware;
+                document.getElementById("Version_bgs").textContent = data.Bugs;
+            })
 
-        //     }, 500)
-        // })
+            fetch("/data_pwm").then(res => {
+                if (!res.ok)
+                    console.error("Error en adquirir los datos del pwm")
+                return res.json()
+            }).then(data => {
+                console.log(data)
+                document.getElementById("PWM_Intensidad").textContent = data.intensidad;
+                document.getElementById("PWM_modo").textContent = data.Modo;
+                document.getElementById("PWM_horarioih").textContent = data.ih1h;
+                document.getElementById("PWM_horarioim").textContent = data.ih1m;
+                document.getElementById("PWM_horariofh").textContent = data.fh1h;
+                document.getElementById("PWM_horariofm").textContent = data.fh1m;
+                document.getElementById("PWM_DIA").textContent = data.DIA;
+            })
+            fetch("/data_triac").then(res => {
+                if (!res.ok)
+                    console.error("Error en adquirir los datos del triac")
+                return res.json()
+            }).then(data => {
+                console.log(data)
+                document.getElementById("TRIAC_modo").textContent = data.Modo;
+                document.getElementById("TRIAC_horarioi1_h").textContent = data.ih1h;
+                document.getElementById("TRIAC_horarioi1_m").textContent = data.ih1m;
+                document.getElementById("TRIAC_horariof1_h").textContent = data.fh1h;
+                document.getElementById("TRIAC_horariof1_m").textContent = data.fh1m;
+                document.getElementById("TRIAC_horarioi2_h").textContent = data.ih2h;
+                document.getElementById("TRIAC_horarioi2_m").textContent = data.ih2m;
+                document.getElementById("TRIAC_horariof2_h").textContent = data.fh2h;
+                document.getElementById("TRIAC_horariof2_m").textContent = data.fh2m;
+                document.getElementById("TRIAC_horarioi3_h").textContent = data.ih3h;
+                document.getElementById("TRIAC_horarioi3_m").textContent = data.ih3m;
+                document.getElementById("TRIAC_horariof3_h").textContent = data.fh3h;
+                document.getElementById("TRIAC_horariof3_m").textContent = data.fh3m;
+                document.getElementById("TRIAC_horarioi4_h").textContent = data.ih4h;
+                document.getElementById("TRIAC_horarioi4_m").textContent = data.ih4m;
+                document.getElementById("TRIAC_horariof4_h").textContent = data.fh4h;
+                document.getElementById("TRIAC_horariof4_m").textContent = data.fh4m;
+            })
+            fetch("/data_red").then(res => {
+                if (!res.ok)
+                    console.error("Error en adquirir los datos de red")
+                return res.json()
+            }).then(data => {
+                console.log(data);
+                document.getElementById("ID").textContent = data.ID;
+                document.getElementById("PASS").textContent = data.PASS;
+
+            })
+            fetch("/data_vegeflor").then(res => {
+                if (!res.ok)
+                    console.error("Error en adquirir los datos de vegeflor")
+                return res.json()
+            }).then(data => {
+                console.log(data)
+                document.getElementById("VEGEFLOR_modo").textContent = data.Modo;
+            })
+
+        })
 
     </script>
 </body>

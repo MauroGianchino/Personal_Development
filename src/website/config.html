@@ -9,13 +9,21 @@
 
 <body>
     <h1>Proyecto Horticultura</h1>
+    <h2>Hora</h2>
+    <form action="/hora" method="post">
+        <label>Hora:</label>
+        <input type="time" id="hora" name="hora" value="00:00">
+        <br><br>
+        <input type="submit" value="Actualizar">
+
+    </form>
     <h2>Red</h2>
-    <form action="/net" method="post">
+    <form action="/red" method="post">
         <label for="Nombre">Nombre:</label>
         <input type="text" id="nombre" name="nombre" placeholder="Nuevo Nombre de Red">
         <br><br>
         <label for="Contraseña">Contraseña:</label>
-        <input type="text" id="Contraseña" name="Contraseña" placeholder="Nueva contraseña">
+        <input type="text" id="Contrasenia" name="Contrasenia" placeholder="Nueva contraseña">
         <br><br>
         <input type="submit" value="Actualizar">
 
@@ -109,7 +117,7 @@
     <form action="/vegeflor" method="post">
 
         <label>Modo:</label>
-        <select id="modos_vegeflor" name="modos_vegeflor">
+        <select id="modo_vegeflor" name="modo_vegeflor">
             <option value="VEGE">VEGE</option>
             <option value="FLORA">FLORA</option>
         </select><br><br>
